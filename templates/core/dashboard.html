@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">Dashboard</h1>
+        <p class="text-muted mb-0">Viewing summary cards, budgets, and trends for {{ current_month_label }}.</p>
+    </div>
+    <a href="{% url 'transaction-add' %}" class="btn btn-primary">Add transaction</a>
+</div>
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">View</label>
+                <select name="period" class="form-select">
+                    {% for value, label in period_choices %}
+                        <option value="{{ value }}" {% if selected_period == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Year</label>
+                <select name="year" class="form-select">
+                    {% for year in available_years %}
+                        <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Month</label>
+                <select name="month" class="form-select">
+                    {% for month_value, month_label in month_choices %}
+                        <option value="{{ month_value }}" {% if selected_month == month_value %}selected{% endif %}>{{ month_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">From</label>
+                <input type="date" name="date_from" value="{{ selected_date_from }}" class="form-control">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">To</label>
+                <input type="date" name="date_to" value="{{ selected_date_to }}" class="form-control">
+            </div>
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-outline-primary" type="submit">Apply</button>
+            </div>
+        </form>
+        <div class="form-text mt-2">Use year and month for monthly/yearly views. Use From/To when View is set to Custom range.</div>
+    </div>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted">Income ({{ preferred_currency.code }})</div><div class="h4">{{ income_total }}</div></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted">Expenses ({{ preferred_currency.code }})</div><div class="h4">{{ expense_total }}</div></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted">Investments ({{ preferred_currency.code }})</div><div class="h4">{{ investment_total }}</div></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted">Savings ({{ preferred_currency.code }})</div><div class="h4">{{ savings }}</div></div></div></div>
+</div>
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Expense Breakdown for {{ current_month_label }}</h2>
+                {% if category_breakdown %}
+                    <ul class="list-group list-group-flush">
+                        {% for row in category_breakdown %}
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>{{ row.category_snapshot|default:"Uncategorized" }}</span>
+                                <span>{{ row.total }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted mb-0">No expense data yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Budgets for {{ current_month_label }}</h2>
+                {% if active_budgets %}
+                    <ul class="list-group list-group-flush">
+                        {% for budget in active_budgets %}
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <strong>{{ budget.category.name }}</strong>
+                                    <span>{{ budget.spent_amount }} / {{ budget.limit_amount }}</span>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar {% if budget.is_over_budget %}bg-danger{% endif %}" style="width: {{ budget.usage_percentage|floatformat:0 }}%"></div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted mb-0">No budgets set for this month.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Trend for {{ current_month_label }}</h2>
+                <div class="mb-4" style="position: relative; height: 320px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+                <p id="trendChartFallback" class="text-muted d-none">Monthly trend chart could not be loaded right now.</p>
+                <h2 class="h5">Recent Transactions</h2>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                                <th>Currency</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in latest_transactions %}
+                                <tr>
+                                    <td>{{ transaction.date }}</td>
+                                    <td>{{ transaction.get_transaction_type_display }}</td>
+                                    <td>{{ transaction.display_category }}</td>
+                                    <td>{{ transaction.description }}</td>
+                                    <td>{{ transaction.amount }}</td>
+                                    <td>{{ transaction.currency.code }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="6" class="text-muted">No transactions recorded yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{ monthly_trend|json_script:"monthly-trend-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const trendRaw = JSON.parse(document.getElementById("monthly-trend-data").textContent);
+const monthlyBuckets = {};
+const fallback = document.getElementById("trendChartFallback");
+for (const row of trendRaw) {
+    const label = row.label;
+    if (!monthlyBuckets[label]) {
+        monthlyBuckets[label] = { income: 0, expense: 0, investment: 0 };
+    }
+    monthlyBuckets[label][row.transaction_type] = Number(row.total);
+}
+const labels = Object.keys(monthlyBuckets);
+if (!window.Chart || labels.length === 0) {
+    fallback.classList.remove("d-none");
+} else {
+    new Chart(document.getElementById("trendChart"), {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [
+                { label: "Income", data: labels.map(label => monthlyBuckets[label].income), backgroundColor: "#198754" },
+                { label: "Expense", data: labels.map(label => monthlyBuckets[label].expense), backgroundColor: "#dc3545" },
+                { label: "Investment", data: labels.map(label => monthlyBuckets[label].investment), backgroundColor: "#0d6efd" },
+                {
+                    label: "Savings",
+                    data: labels.map(label => monthlyBuckets[label].income - monthlyBuckets[label].expense - monthlyBuckets[label].investment),
+                    type: "line",
+                    borderColor: "#6f42c1",
+                    backgroundColor: "#6f42c1",
+                    tension: 0.25
+                }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+</script>
+{% endblock %}
