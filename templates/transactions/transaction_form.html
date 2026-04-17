@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h1 class="h4 mb-3">{{ title }}</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form.transaction_type.label_tag }}
+                {{ form.transaction_type }}
+                {% if form.transaction_type.errors %}<div class="text-danger small">{{ form.transaction_type.errors }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+                {{ form.category.label_tag }}
+                {{ form.category }}
+                {% if form.category.errors %}<div class="text-danger small">{{ form.category.errors }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+                {{ form.date.label_tag }}
+                {{ form.date }}
+                {% if form.date.errors %}<div class="text-danger small">{{ form.date.errors }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+                {{ form.amount.label_tag }}
+                {{ form.amount }}
+                {% if form.amount.errors %}<div class="text-danger small">{{ form.amount.errors }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+                {{ form.currency.label_tag }}
+                {{ form.currency }}
+                {% if form.currency.errors %}<div class="text-danger small">{{ form.currency.errors }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+                {{ form.description.label_tag }}
+                {{ form.description }}
+                {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+                {{ form.receipt.label_tag }}
+                {{ form.receipt }}
+                <div class="form-text">Accepted formats: PDF, JPG, PNG, WEBP. Maximum size: 5 MB.</div>
+                {% if form.instance.receipt %}
+                    <div class="mt-2">
+                        Current receipt:
+                        <a href="{{ form.instance.receipt.url }}" target="_blank">View uploaded file</a>
+                    </div>
+                {% endif %}
+                {% if form.receipt.errors %}<div class="text-danger small">{{ form.receipt.errors }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+                {{ form.notes.label_tag }}
+                {{ form.notes }}
+                {% if form.notes.errors %}<div class="text-danger small">{{ form.notes.errors }}</div>{% endif %}
+            </div>
+            <button class="btn btn-primary" type="submit">Save</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

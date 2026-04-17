@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Transactions</h1>
+    <div>
+        <a href="{% url 'transaction-list' %}?transaction_type={{ selected_type }}&category={{ selected_category }}&currency={{ selected_currency }}&refund={{ selected_refund }}&amount_min={{ amount_min }}&amount_max={{ amount_max }}&search={{ search }}&date_from={{ date_from }}&date_to={{ date_to }}&export=csv" class="btn btn-outline-secondary">Export CSV</a>
+        <a href="{% url 'transaction-bulk-upload' %}" class="btn btn-outline-primary">Bulk upload CSV</a>
+        <a href="{% url 'transaction-add' %}" class="btn btn-primary">Add transaction</a>
+    </div>
+</div>
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-2">
+        <label class="form-label">Type</label>
+        <select name="transaction_type" class="form-select">
+            <option value="">All</option>
+            <option value="income" {% if selected_type == "income" %}selected{% endif %}>Income</option>
+            <option value="expense" {% if selected_type == "expense" %}selected{% endif %}>Expense</option>
+            <option value="investment" {% if selected_type == "investment" %}selected{% endif %}>Investment</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Category</label>
+        <select name="category" class="form-select">
+            <option value="">All</option>
+            {% for category in categories %}
+                <option value="{{ category.pk }}" {% if selected_category == category.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ category.name }} ({{ category.get_transaction_type_display }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Currency</label>
+        <select name="currency" class="form-select">
+            <option value="">All</option>
+            {% for currency in currencies %}
+                <option value="{{ currency.code }}" {% if selected_currency == currency.code %}selected{% endif %}>{{ currency.code }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Refunds</label>
+        <select name="refund" class="form-select">
+            <option value="">All</option>
+            <option value="yes" {% if selected_refund == "yes" %}selected{% endif %}>Refunds only</option>
+            <option value="no" {% if selected_refund == "no" %}selected{% endif %}>Exclude refunds</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Min amount</label>
+        <input type="number" step="0.01" name="amount_min" value="{{ amount_min }}" class="form-control" placeholder="0.00">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Max amount</label>
+        <input type="number" step="0.01" name="amount_max" value="{{ amount_max }}" class="form-control" placeholder="5000.00">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">From</label>
+        <input type="date" name="date_from" value="{{ date_from }}" class="form-control">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">To</label>
+        <input type="date" name="date_to" value="{{ date_to }}" class="form-control">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Search</label>
+        <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Description, notes, category">
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button class="btn btn-primary" type="submit">Apply</button>
+    </div>
+</form>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Currency</th>
+                <th>Receipt</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction.date }}</td>
+                    <td>{{ transaction.get_transaction_type_display }}</td>
+                    <td>{{ transaction.display_category }}</td>
+                    <td>{{ transaction.description }}</td>
+                    <td>{{ transaction.amount }}</td>
+                    <td>{{ transaction.currency.code }}</td>
+                    <td>
+                        {% if transaction.receipt %}
+                            <a href="{{ transaction.receipt.url }}" target="_blank">View</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'transaction-edit' transaction.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                        <a href="{% url 'transaction-delete' transaction.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="8" class="text-muted">No transactions found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
