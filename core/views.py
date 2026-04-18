@@ -2,6 +2,7 @@ from calendar import month_name
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -14,6 +15,10 @@ from transactions.services import (
     quantize_money,
     summarize_transactions_in_currency,
 )
+
+
+def health_view(request):
+    return JsonResponse({"status": "ok"})
 
 
 @login_required
