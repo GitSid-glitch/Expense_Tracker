@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h1 class="h4 mb-3">Bulk Upload Transactions</h1>
+                <p class="text-muted">
+                    Upload a CSV to create many transactions in one go. Supported columns:
+                    <code>date</code>, <code>amount</code>, <code>description</code>, <code>currency</code>,
+                    optional <code>transaction_type</code>, <code>category</code>, and <code>notes</code>.
+                </p>
+                <p class="text-muted">
+                    If <code>transaction_type</code> is omitted, positive amounts become expenses and negative amounts become income.
+                    Category names can repeat across rows and missing categories are created automatically.
+                </p>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-primary" type="submit">Upload CSV</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5">Bulk Upload History</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Source</th>
+                                <th>Imported</th>
+                                <th>Skipped</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in uploads %}
+                                <tr>
+                                    <td>{{ item.source_name }}</td>
+                                    <td>{{ item.imported_count }}</td>
+                                    <td>{{ item.skipped_count }}</td>
+                                    <td>{{ item.created_at }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="4" class="text-muted">No bulk uploads yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
