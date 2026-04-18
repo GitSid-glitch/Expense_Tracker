@@ -137,3 +137,60 @@ Demo login:
 ```bash
 python manage.py test
 ```
+
+## Deployment
+
+The fastest deployment path for this project is a managed PostgreSQL database plus a Django web service running `gunicorn`.
+
+### Required production variables
+
+- `DJANGO_SECRET_KEY`
+- `DEBUG=0`
+- `ALLOWED_HOSTS`
+- `CSRF_TRUSTED_ORIGINS`
+- either `DATABASE_URL` or the `POSTGRES_*` variables
+- `APP_BASE_URL`
+- optional Google OAuth and email variables
+
+### Production commands
+
+```bash
+pip install -r requirements.txt
+./build.sh
+gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+```
+
+### Fast Render deployment
+
+1. Create a PostgreSQL database on Render.
+2. Create a Web Service from this repo.
+3. Use build command:
+
+```bash
+pip install -r requirements.txt && ./build.sh
+```
+
+4. Use start command:
+
+```bash
+gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+```
+
+5. Set environment variables:
+   - `DJANGO_SECRET_KEY`
+   - `DEBUG=0`
+   - `DATABASE_URL`
+   - `ALLOWED_HOSTS=<your-domain>`
+   - `CSRF_TRUSTED_ORIGINS=https://<your-domain>`
+   - `APP_BASE_URL=https://<your-domain>`
+
+### AWS EC2 deployment outline
+
+1. Provision EC2 and PostgreSQL or RDS.
+2. Install Python, `nginx`, and requirements.
+3. Export production environment variables.
+4. Run `./build.sh`.
+5. Start `gunicorn`.
+6. Put `nginx` in front as the reverse proxy.
+
+If you are short on time, Render is usually the fastest path to a working deployed demo.
