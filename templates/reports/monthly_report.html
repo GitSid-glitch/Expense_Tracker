@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h3 mb-1">Financial Report</h1>
+<p class="text-muted mb-4">Viewing report data for {{ period_label }}.</p>
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-2">
+        <label class="form-label">View</label>
+        <select name="period" class="form-select">
+            {% for value, label in period_choices %}
+                <option value="{{ value }}" {% if selected_period == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Year</label>
+        <select name="year" class="form-select">
+            {% for year in available_years %}
+                <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">Month</label>
+        <select name="month" class="form-select">
+            {% for month_value, month_label in month_choices %}
+                <option value="{{ month_value }}" {% if selected_month == month_value %}selected{% endif %}>{{ month_label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Transaction type</label>
+        <select name="transaction_type" class="form-select">
+            <option value="">All</option>
+            <option value="income" {% if selected_type == "income" %}selected{% endif %}>Income</option>
+            <option value="expense" {% if selected_type == "expense" %}selected{% endif %}>Expense</option>
+            <option value="investment" {% if selected_type == "investment" %}selected{% endif %}>Investment</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Currency</label>
+        <select name="currency" class="form-select">
+            <option value="">All currencies</option>
+            {% for currency in currency_choices %}
+                <option value="{{ currency.code }}" {% if selected_currency == currency.code %}selected{% endif %}>{{ currency.code }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">From</label>
+        <input type="date" name="date_from" value="{{ date_from }}" class="form-control">
+    </div>
+    <div class="col-md-2">
+        <label class="form-label">To</label>
+        <input type="date" name="date_to" value="{{ date_to }}" class="form-control">
+    </div>
+    <div class="col-md-12 d-flex align-items-end">
+        <button class="btn btn-primary" type="submit">Filter</button>
+        <button class="btn btn-outline-secondary ms-2" type="submit" name="export" value="csv">Export CSV</button>
+    </div>
+</form>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Total income ({{ preferred_currency.code }})</div><div class="h4">{{ totals.income }}</div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Total expenses ({{ preferred_currency.code }})</div><div class="h4">{{ totals.expense }}</div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Total investments ({{ preferred_currency.code }})</div><div class="h4">{{ totals.investment }}</div></div></div></div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <h2 class="h5">Monthly aggregates</h2>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Type</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in chart_rows %}
+                        <tr>
+                            <td>{{ row.month }}</td>
+                            <td>{{ row.transaction_type|title }}</td>
+                            <td>{{ row.total }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="3" class="text-muted">No reporting data yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="card mt-4">
+    <div class="card-body">
+        <h2 class="h5">Expense Category Summary</h2>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Total ({{ preferred_currency.code }})</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in category_rows %}
+                        <tr>
+                            <td>{{ row.category }}</td>
+                            <td>{{ row.total }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="2" class="text-muted">No expense data for the selected filters.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
