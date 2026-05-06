@@ -1,108 +1,185 @@
 # Personal Finance Tracker
 
-A backend-focused Django application for tracking income, expenses, investments, budgets, receipts, and multi-currency reporting.
+A backend-focused finance management application built with Django and Django REST Framework for tracking income, expenses, investments, budgets, and multi-currency financial reports.
 
-## Stack
+---
+
+## Features
+
+### Authentication & User Management
+- User signup, login, and logout
+- Profile management
+- Google OAuth authentication via `django-allauth`
+
+### Transactions & Categories
+- Category CRUD operations
+- Income and expense tracking
+- Refund handling through negative expense transactions
+- Receipt uploads and storage
+
+### Budgets & Reports
+- Budget creation and tracking
+- Budget alert notifications
+- Monthly dashboard analytics with charts
+- Preferred currency summaries
+- Multi-currency reporting
+- CSV export for transactions and reports
+
+### API Support
+Read-only REST API endpoints:
+- `/reports/api/summary/`
+- `/reports/api/monthly-breakdown/`
+
+### Utilities
+- Demo data seeding command
+- PostgreSQL-first configuration
+- Optional SQLite fallback for local development
+
+---
+
+# Tech Stack
 
 - Django
 - Django REST Framework
-- Django Templates
 - PostgreSQL
-- django-allauth for Google OAuth
+- Django Templates
+- `django-allauth`
+- Gunicorn
 
-## Features Implemented
+---
 
-- user signup, login, logout, and profile management
-- Google OAuth foundation via `django-allauth`
-- category and transaction CRUD
-- refund handling through negative expense transactions
-- receipt uploads
-- budget creation, tracking, and alert notifications
-- dashboard with charted monthly trends
-- preferred currency summaries and reports
-- CSV export for transactions and reports
-- read-only DRF endpoints for finance summary and monthly breakdown
-- demo data seeding command
+# Project Setup
 
-## Local Setup
+## 1. Clone the Repository
 
-1. Create and activate the virtual environment:
+```bash
+git clone <your-repo-url>
+cd <your-project-folder>
+```
+
+---
+
+## 2. Create a Virtual Environment
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-2. Install dependencies:
+---
+
+## 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Copy environment values from `.env.example`.
+---
 
-4. Start PostgreSQL locally.
-   You can either use Docker or the project-local Homebrew/Postgres flow:
+## 4. Configure Environment Variables
+
+Copy values from `.env.example` and configure the required variables.
+
+### Required Variables
+
+```env
+POSTGRES_DB=finance_tracker
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+
+APP_BASE_URL=http://127.0.0.1:8000
+
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
+```
+
+### Optional Local Development Fallback
+
+```env
+USE_SQLITE_FOR_LOCAL_DEV=1
+```
+
+> SQLite support exists only as a temporary fallback. PostgreSQL is the intended database for this project.
+
+---
+
+# Database Setup
+
+## Option 1 — Docker (Recommended)
 
 ```bash
 docker compose up -d
 ```
 
-or
+---
+
+## Option 2 — Local PostgreSQL
+
+Install PostgreSQL locally:
 
 ```bash
 brew install postgresql@16
+```
+
+Start the local runtime:
+
+```bash
 ./scripts/start_postgres.sh
 ```
 
-5. Run migrations:
+Use the following environment values:
 
 ```bash
-POSTGRES_HOST="$PWD/.postgres-run" POSTGRES_PORT=5432 POSTGRES_USER=postgres POSTGRES_DB=finance_tracker python manage.py migrate
+POSTGRES_HOST="$PWD/.postgres-run"
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_DB=finance_tracker
 ```
 
-6. Run the server:
+---
+
+# Run Migrations
 
 ```bash
-POSTGRES_HOST="$PWD/.postgres-run" POSTGRES_PORT=5432 POSTGRES_USER=postgres POSTGRES_DB=finance_tracker python manage.py runserver
+python manage.py migrate
 ```
 
-## Environment Variables
+---
 
-- `POSTGRES_DB`
-- `POSTGRES_USER`
-- `POSTGRES_PASSWORD`
-- `POSTGRES_HOST`
-- `POSTGRES_PORT`
-- `GOOGLE_OAUTH_CLIENT_ID`
-- `GOOGLE_OAUTH_CLIENT_SECRET`
-- `APP_BASE_URL`
+# Start the Development Server
 
-`USE_SQLITE_FOR_LOCAL_DEV=1` exists only as a temporary fallback for environments without a running PostgreSQL server. The intended project database is PostgreSQL.
+```bash
+python manage.py runserver
+```
 
-For the project-local Postgres runtime started by `./scripts/start_postgres.sh`, use:
+Application URL:
 
-- `POSTGRES_HOST=$PWD/.postgres-run`
-- `POSTGRES_PORT=5432`
-- `POSTGRES_USER=postgres`
-- `POSTGRES_DB=finance_tracker`
+```text
+http://127.0.0.1:8000
+```
 
-## Google OAuth Setup
+---
 
-Google OAuth is free to configure using Google Cloud's OAuth consent screen and web application credentials.
+# Google OAuth Setup
 
-1. Open Google Cloud Console.
-2. Create or select a project.
-3. Configure the OAuth consent screen.
-4. Create an OAuth Client ID for a Web application.
-5. Add these Authorized redirect URIs:
+Google OAuth can be configured through Google Cloud Console.
+
+## Steps
+
+1. Open Google Cloud Console
+2. Create or select a project
+3. Configure the OAuth consent screen
+4. Create OAuth credentials for a Web Application
+5. Add the following redirect URIs:
 
 ```text
 http://127.0.0.1:8000/oauth/google/login/callback/
 http://localhost:8000/oauth/google/login/callback/
 ```
 
-6. Put the generated values into your environment:
+6. Add credentials to your environment:
 
 ```bash
 export APP_BASE_URL="http://127.0.0.1:8000"
@@ -110,87 +187,33 @@ export GOOGLE_OAUTH_CLIENT_ID="your-client-id"
 export GOOGLE_OAUTH_CLIENT_SECRET="your-client-secret"
 ```
 
-7. Restart the Django server.
+7. Restart the Django server
 
-Once those values are present, the login and signup pages will show active Google buttons and the callback flow will work.
+Once configured, Google login and signup will be enabled automatically.
 
-## Demo Data
+---
 
-To load demo data:
+# Demo Data
+
+Load demo data:
 
 ```bash
 python manage.py seed_demo_data
 ```
 
-Demo login:
+## Demo Credentials
 
-- username: `demo`
-- password: `demo12345`
+```text
+username: demo
+password: demo12345
+```
 
-## API Endpoints
+---
 
-- `/reports/api/summary/`
-- `/reports/api/monthly-breakdown/`
-
-## Testing
+# Running Tests
 
 ```bash
 python manage.py test
 ```
 
-## Deployment
-
-The fastest deployment path for this project is a managed PostgreSQL database plus a Django web service running `gunicorn`.
-
-### Required production variables
-
-- `DJANGO_SECRET_KEY`
-- `DEBUG=0`
-- `ALLOWED_HOSTS`
-- `CSRF_TRUSTED_ORIGINS`
-- either `DATABASE_URL` or the `POSTGRES_*` variables
-- `APP_BASE_URL`
-- optional Google OAuth and email variables
-
-### Production commands
-
-```bash
-pip install -r requirements.txt
-./build.sh
-gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
-```
-
-### Fast Render deployment
-
-1. Create a PostgreSQL database on Render.
-2. Create a Web Service from this repo.
-3. Use build command:
-
-```bash
-pip install -r requirements.txt && ./build.sh
-```
-
-4. Use start command:
-
-```bash
-gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
-```
-
-5. Set environment variables:
-   - `DJANGO_SECRET_KEY`
-   - `DEBUG=0`
-   - `DATABASE_URL`
-   - `ALLOWED_HOSTS=<your-domain>`
-   - `CSRF_TRUSTED_ORIGINS=https://<your-domain>`
-   - `APP_BASE_URL=https://<your-domain>`
-
-### AWS EC2 deployment outline
-
-1. Provision EC2 and PostgreSQL or RDS.
-2. Install Python, `nginx`, and requirements.
-3. Export production environment variables.
-4. Run `./build.sh`.
-5. Start `gunicorn`.
-6. Put `nginx` in front as the reverse proxy.
-
-If you are short on time, Render is usually the fastest path to a working deployed demo.
+---
