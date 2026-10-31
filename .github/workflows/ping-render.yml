@@ -11,5 +11,5 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping application
-        run: curl -sSf https://expense-tracker-250p.onrender.com/ > /dev/null || echo "Ping failed, but continuing"
+      - name: Check application and database
+        run: curl --fail --show-error --silent --retry 2 https://expense-tracker-250p.onrender.com/health/ > /dev/null

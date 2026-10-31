@@ -21,8 +21,8 @@
                 <tr>
                     <td>{{ budget.category.name }}</td>
                     <td>{{ budget.month|date:"Y-m" }}</td>
-                    <td>{{ budget.limit_amount }}</td>
-                    <td>{{ budget.spent_amount }}</td>
+                    <td>{{ budget.limit_amount }} {{ budget.currency.code }}</td>
+                    <td>{{ budget.spent_amount }} {{ budget.currency.code }}</td>
                     <td>{% if budget.is_over_budget %}<span class="text-danger">Over budget</span>{% else %}On track{% endif %}</td>
                     <td class="text-end">
                         <a href="{% url 'budget-edit' budget.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>

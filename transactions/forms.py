@@ -108,6 +108,14 @@ class StatementImportForm(forms.ModelForm):
         model = StatementImport
         fields = ("source_name", "file")
 
+    def clean_file(self):
+        uploaded_file = self.cleaned_data["file"]
+        if not uploaded_file.name.lower().endswith((".csv", ".pdf")):
+            raise forms.ValidationError("Upload a CSV or PDF statement.")
+        if uploaded_file.size > 5 * 1024 * 1024:
+            raise forms.ValidationError("Statement file must be 5 MB or smaller.")
+        return uploaded_file
+
 
 class BulkTransactionUploadForm(forms.Form):
     source_name = forms.CharField(max_length=255, required=False)
@@ -122,4 +130,6 @@ class BulkTransactionUploadForm(forms.Form):
         uploaded_file = self.cleaned_data["file"]
         if not uploaded_file.name.lower().endswith(".csv"):
             raise forms.ValidationError("Bulk upload currently supports CSV files only.")
+        if uploaded_file.size > 5 * 1024 * 1024:
+            raise forms.ValidationError("Bulk upload file must be 5 MB or smaller.")
         return uploaded_file

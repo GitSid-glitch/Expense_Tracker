@@ -1,10 +1,13 @@
 import csv
 import hashlib
 import io
+from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import ValidationError
+from django.db import transaction as db_transaction
 from pypdf import PdfReader
+from pypdf.errors import PdfReadError
 
 from transactions.models import Category, ImportedTransaction, Transaction, TransactionType
 
@@ -56,7 +59,10 @@ def categorize_from_description(user, transaction_type, description):
 
 
 def parse_csv_rows(file_obj):
-    decoded = file_obj.read().decode("utf-8")
+    try:
+        decoded = file_obj.read().decode("utf-8-sig")
+    except UnicodeDecodeError as error:
+        raise ValidationError("Statement CSV must be UTF-8 encoded.") from error
     reader = csv.DictReader(io.StringIO(decoded))
     for row in reader:
         yield {
@@ -64,11 +70,15 @@ def parse_csv_rows(file_obj):
             "amount": row.get("amount") or row.get("Amount"),
             "description": row.get("description") or row.get("Description") or "",
             "currency": row.get("currency") or row.get("Currency") or "INR",
+            "transaction_type": row.get("transaction_type") or row.get("Transaction Type") or "",
         }
 
 
 def parse_pdf_rows(file_obj):
-    reader = PdfReader(file_obj)
+    try:
+        reader = PdfReader(file_obj)
+    except PdfReadError as error:
+        raise ValidationError("Statement PDF could not be read.") from error
     text = "\n".join((page.extract_text() or "") for page in reader.pages)
     rows = []
     for line in text.splitlines():
@@ -85,6 +95,7 @@ def parse_pdf_rows(file_obj):
     return rows
 
 
+@db_transaction.atomic
 def import_statement(statement_import, currency_lookup):
     uploaded_file = statement_import.file
     uploaded_file.open("rb")
@@ -95,48 +106,53 @@ def import_statement(statement_import, currency_lookup):
     elif filename.endswith(".pdf"):
         rows = parse_pdf_rows(uploaded_file)
     else:
-        statement_import.skipped_count += 1
-        statement_import.save(update_fields=["skipped_count", "updated_at"])
-        return statement_import
+        raise ValidationError("Upload a CSV or PDF statement.")
+
+    if not rows:
+        raise ValidationError("No transaction rows were found in this statement.")
 
     for row in rows:
         try:
             amount_value = Decimal(str(row["amount"]).replace(",", ""))
-        except (InvalidOperation, TypeError, ValueError):
+            if not amount_value.is_finite() or amount_value == 0:
+                raise ValidationError("Amount must be a finite non-zero number.")
+            date_value = date.fromisoformat(str(row.get("date") or ""))
+            transaction_type = _normalize_transaction_type(row.get("transaction_type"), amount_value)
+            description_value = (row.get("description") or "Imported transaction").strip()
+            currency_code = (row.get("currency") or "INR").strip().upper()
+            currency = currency_lookup(currency_code)
+        except (InvalidOperation, TypeError, ValueError, ValidationError):
             statement_import.skipped_count += 1
             continue
 
-        date_value = row.get("date")
-        description_value = (row.get("description") or "Imported transaction").strip()
-        currency_code = (row.get("currency") or "INR").strip().upper()
         fingerprint = fingerprint_row(date_value, amount_value, description_value, currency_code)
 
         if ImportedTransaction.objects.filter(transaction__user=statement_import.user, fingerprint=fingerprint).exists():
             statement_import.duplicate_count += 1
             continue
 
-        currency = currency_lookup(currency_code)
-        transaction_type = infer_transaction_type(amount_value)
-        normalized_amount = abs(amount_value)
-        category = categorize_from_description(statement_import.user, transaction_type, description_value)
-
-        transaction = Transaction.objects.create(
-            user=statement_import.user,
-            category=category,
-            transaction_type=transaction_type,
-            date=date_value,
-            amount=normalized_amount,
-            currency=currency,
-            description=description_value,
-            notes=f"Imported from {statement_import.source_name or statement_import.file.name}",
-        )
-        ImportedTransaction.objects.create(
-            statement_import=statement_import,
-            transaction=transaction,
-            fingerprint=fingerprint,
-            raw_description=description_value,
-        )
-        statement_import.imported_count += 1
+        try:
+            with db_transaction.atomic():
+                category = categorize_from_description(statement_import.user, transaction_type, description_value)
+                transaction = Transaction.objects.create(
+                    user=statement_import.user,
+                    category=category,
+                    transaction_type=transaction_type,
+                    date=date_value,
+                    amount=amount_value if transaction_type == TransactionType.EXPENSE and row.get("transaction_type") else abs(amount_value),
+                    currency=currency,
+                    description=description_value,
+                    notes=f"Imported from {statement_import.source_name or statement_import.file.name}",
+                )
+                ImportedTransaction.objects.create(
+                    statement_import=statement_import,
+                    transaction=transaction,
+                    fingerprint=fingerprint,
+                    raw_description=description_value,
+                )
+                statement_import.imported_count += 1
+        except ValidationError:
+            statement_import.skipped_count += 1
 
     statement_import.save(update_fields=["imported_count", "duplicate_count", "skipped_count", "updated_at"])
     return statement_import

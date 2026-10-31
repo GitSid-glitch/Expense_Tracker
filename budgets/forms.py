@@ -2,7 +2,7 @@ from django import forms
 from datetime import date
 
 from budgets.models import Budget
-from transactions.models import Category, TransactionType
+from transactions.models import Category, Currency, TransactionType
 
 
 class BudgetForm(forms.ModelForm):
@@ -16,7 +16,7 @@ class BudgetForm(forms.ModelForm):
 
     class Meta:
         model = Budget
-        fields = ("category", "month", "limit_amount")
+        fields = ("category", "month", "limit_amount", "currency")
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
@@ -35,6 +35,13 @@ class BudgetForm(forms.ModelForm):
         else:
             category_queryset = category_queryset.filter(is_active=True)
         self.fields["category"].queryset = category_queryset.order_by("name")
+        self.fields["currency"].queryset = Currency.objects.filter(is_active=True).order_by("code")
+        if not self.instance.pk:
+            preferred_code = getattr(self.user.profile, "preferred_currency", "INR")
+            self.initial["currency"] = (
+                Currency.objects.filter(code=preferred_code, is_active=True).first()
+                or Currency.objects.get(code="INR")
+            )
 
     def clean_month(self):
         month = self.cleaned_data["month"]

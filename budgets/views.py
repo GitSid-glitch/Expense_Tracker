@@ -10,7 +10,7 @@ from budgets.services import send_budget_alerts_for_budget
 
 @login_required
 def budget_list_view(request):
-    budgets = Budget.objects.filter(user=request.user).select_related("category")
+    budgets = Budget.objects.filter(user=request.user).select_related("category", "currency")
     return render(request, "budgets/budget_list.html", {"budgets": budgets})
 
 

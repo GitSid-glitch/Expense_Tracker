@@ -236,6 +236,32 @@ class TransactionModelTests(TestCase):
         duplicate_statement.refresh_from_db()
         self.assertEqual(duplicate_statement.duplicate_count, 1)
 
+    def test_statement_import_accepts_explicit_type_and_skips_invalid_rows(self):
+        csv_content = (
+            b"date,amount,description,currency,transaction_type\n"
+            b"2026-04-10,1200.00,Salary payout,INR,income\n"
+            b"bad-date,50.00,Invalid date,INR,expense\n"
+            b"2026-04-11,25.00,Unknown currency,XYZ,expense\n"
+        )
+        statement = StatementImport.objects.create(
+            user=self.user,
+            source_name="April Statement",
+            file=SimpleUploadedFile("statement.csv", csv_content, content_type="text/csv"),
+        )
+
+        def currency_lookup(code):
+            currency = Currency.objects.filter(code=code).first()
+            if currency is None:
+                raise ValidationError("Unsupported currency")
+            return currency
+
+        import_statement(statement, currency_lookup)
+        statement.refresh_from_db()
+        self.assertEqual(statement.imported_count, 1)
+        self.assertEqual(statement.skipped_count, 2)
+        imported = Transaction.objects.get(description="Salary payout")
+        self.assertEqual(imported.transaction_type, TransactionType.INCOME)
+
     def test_bulk_import_creates_multiple_transactions(self):
         csv_content = (
             b"date,amount,description,currency,transaction_type,category,notes\n"

@@ -54,7 +54,7 @@ class ReportViewsTests(TestCase):
         )
 
     def test_monthly_report_renders_in_preferred_currency(self):
-        response = self.client.get(reverse("monthly-report"))
+        response = self.client.get(reverse("monthly-report"), {"year": 2026, "month": 4})
         self.assertContains(response, "USD")
         self.assertContains(response, "100.00")
 
@@ -75,7 +75,7 @@ class ReportViewsTests(TestCase):
         self.assertIn("monthly-report.csv", response["Content-Disposition"])
 
     def test_monthly_report_shows_category_summary(self):
-        response = self.client.get(reverse("monthly-report"))
+        response = self.client.get(reverse("monthly-report"), {"year": 2026, "month": 4})
         self.assertContains(response, "Expense Category Summary")
         self.assertContains(response, "Food")
 

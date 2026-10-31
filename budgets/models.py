@@ -3,10 +3,15 @@ from decimal import Decimal
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Sum
+from django.utils.functional import cached_property
 
 from core.models import TimestampedModel
-from transactions.models import Category, Transaction, TransactionType
+from transactions.models import Category, Currency, Transaction, TransactionType
+from transactions.services import convert_amount
+
+
+def default_budget_currency():
+    return Currency.objects.get(code="INR").pk
 
 
 class Budget(TimestampedModel):
@@ -14,6 +19,7 @@ class Budget(TimestampedModel):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="budgets")
     month = models.DateField(help_text="Use the first day of the month.")
     limit_amount = models.DecimalField(max_digits=14, decimal_places=2)
+    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, default=default_budget_currency)
 
     class Meta:
         ordering = ("-month", "category__name")
@@ -32,17 +38,18 @@ class Budget(TimestampedModel):
         if self.category.transaction_type != TransactionType.EXPENSE:
             raise ValidationError("Budgets can only be created for expense categories.")
 
-    @property
+    @cached_property
     def spent_amount(self):
-        return (
-            Transaction.objects.filter(
-                user=self.user,
-                category=self.category,
-                transaction_type=TransactionType.EXPENSE,
-                date__year=self.month.year,
-                date__month=self.month.month,
-            ).aggregate(total=Sum("amount"))["total"]
-            or Decimal("0.00")
+        expenses = Transaction.objects.filter(
+            user=self.user,
+            category=self.category,
+            transaction_type=TransactionType.EXPENSE,
+            date__year=self.month.year,
+            date__month=self.month.month,
+        ).select_related("currency")
+        return sum(
+            (convert_amount(transaction.amount, transaction.currency, self.currency) for transaction in expenses),
+            Decimal("0.00"),
         )
 
     @property

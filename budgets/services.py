@@ -21,7 +21,7 @@ def send_budget_alerts_for_budget(budget):
                 title=f"Budget alert for {budget.category.name}",
                 message=(
                     f"Your {budget.category.name} budget for {budget.month:%B %Y} has reached {threshold}% usage. "
-                    f"Spent: {spent_amount}. Limit: {budget.limit_amount}."
+                    f"Spent: {spent_amount} {budget.currency.code}. Limit: {budget.limit_amount} {budget.currency.code}."
                 ),
                 related_budget_alert=budget_alert,
             )

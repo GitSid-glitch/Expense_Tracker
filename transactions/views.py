@@ -2,6 +2,7 @@ import csv
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -115,11 +116,20 @@ def statement_import_view(request):
             statement_import.save()
 
             def currency_lookup(code):
-                return Currency.objects.filter(code=code, is_active=True).first() or Currency.objects.get(code="INR")
+                currency = Currency.objects.filter(code=code, is_active=True).first()
+                if currency is None:
+                    raise ValidationError(f"Unsupported currency: {code}")
+                return currency
 
-            import_statement(statement_import, currency_lookup)
-            messages.success(request, "Statement processed successfully.")
-            return redirect("statement-import")
+            try:
+                import_statement(statement_import, currency_lookup)
+            except ValidationError as error:
+                statement_import.file.delete(save=False)
+                statement_import.delete()
+                form.add_error("file", error)
+            else:
+                messages.success(request, "Statement processed successfully.")
+                return redirect("statement-import")
     else:
         form = StatementImportForm()
 
@@ -143,7 +153,10 @@ def transaction_bulk_upload_view(request):
             )
 
             def currency_lookup(code):
-                return Currency.objects.filter(code=code, is_active=True).first() or Currency.objects.get(code="INR")
+                currency = Currency.objects.filter(code=code, is_active=True).first()
+                if currency is None:
+                    raise ValidationError(f"Unsupported currency: {code}")
+                return currency
 
             bulk_import_transactions(upload, currency_lookup)
             messages.success(

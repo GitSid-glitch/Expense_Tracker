@@ -85,7 +85,7 @@
                             <li class="list-group-item">
                                 <div class="d-flex justify-content-between">
                                     <strong>{{ budget.category.name }}</strong>
-                                    <span>{{ budget.spent_amount }} / {{ budget.limit_amount }}</span>
+                                    <span>{{ budget.spent_amount }} / {{ budget.limit_amount }} {{ budget.currency.code }}</span>
                                 </div>
                                 <div class="progress mt-2">
                                     <div class="progress-bar {% if budget.is_over_budget %}bg-danger{% endif %}" style="width: {{ budget.usage_percentage|floatformat:0 }}%"></div>

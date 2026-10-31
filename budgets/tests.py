@@ -3,7 +3,9 @@ from decimal import Decimal
 
 from django.contrib.auth.models import User
 from django.core import mail
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 
 from budgets.forms import BudgetForm
 from budgets.models import Budget, UserNotification
@@ -42,6 +44,44 @@ class BudgetModelTests(TestCase):
         )
         self.assertEqual(budget.spent_amount, Decimal("600.00"))
         self.assertTrue(budget.is_over_budget)
+
+    def test_spent_amount_converts_mixed_currencies_to_budget_currency(self):
+        usd, _ = Currency.objects.update_or_create(
+            code="USD",
+            defaults={"name": "US Dollar", "symbol": "$", "exchange_rate_to_inr": Decimal("80.0000")},
+        )
+        budget = Budget.objects.create(
+            user=self.user,
+            category=self.category,
+            month=date(2026, 4, 1),
+            limit_amount=Decimal("1000.00"),
+            currency=self.currency,
+        )
+        for amount, currency in [(Decimal("100.00"), self.currency), (Decimal("10.00"), usd)]:
+            Transaction.objects.create(
+                user=self.user,
+                category=self.category,
+                transaction_type=TransactionType.EXPENSE,
+                date=date(2026, 4, 10),
+                amount=amount,
+                currency=currency,
+                description="Groceries",
+            )
+        self.assertEqual(budget.spent_amount, Decimal("900.00"))
+
+    def test_budget_summary_reuses_spending_query(self):
+        budget = Budget.objects.create(
+            user=self.user,
+            category=self.category,
+            month=date(2026, 4, 1),
+            limit_amount=Decimal("500.00"),
+            currency=self.currency,
+        )
+        with CaptureQueriesContext(connection) as queries:
+            budget.spent_amount
+            budget.usage_percentage
+            budget.is_over_budget
+        self.assertEqual(len(queries), 1)
 
     def test_budget_alert_email_sent_once_per_threshold(self):
         budget = Budget.objects.create(
@@ -106,6 +146,7 @@ class BudgetModelTests(TestCase):
                 "category": self.category.pk,
                 "month": "2026-04",
                 "limit_amount": "1000.00",
+                "currency": self.currency.pk,
             },
             user=self.user,
         )
@@ -123,6 +164,7 @@ class BudgetModelTests(TestCase):
                 "category": self.category.pk,
                 "month": "2026-04",
                 "limit_amount": "600.00",
+                "currency": self.currency.pk,
             },
             user=self.user,
         )
@@ -135,6 +177,7 @@ class BudgetModelTests(TestCase):
                 "category": self.category.pk,
                 "month": "2026-04",
                 "limit_amount": "0.00",
+                "currency": self.currency.pk,
             },
             user=self.user,
         )
@@ -159,6 +202,7 @@ class BudgetModelTests(TestCase):
                 "category": self.category.pk,
                 "month": "2026-04",
                 "limit_amount": "1000.00",
+                "currency": self.currency.pk,
             },
         )
 

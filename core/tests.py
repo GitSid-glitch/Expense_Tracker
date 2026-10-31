@@ -1,7 +1,9 @@
 from datetime import date
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
+from django.db import DatabaseError
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -15,6 +17,12 @@ class DashboardViewTests(TestCase):
         response = self.client.get(reverse("health"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "ok"})
+
+    def test_health_endpoint_reports_database_failure(self):
+        with patch("core.views.connection.cursor", side_effect=DatabaseError("database unavailable")):
+            response = self.client.get(reverse("health"))
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json(), {"status": "unavailable"})
 
     def test_dashboard_requires_login(self):
         response = self.client.get(reverse("dashboard"))

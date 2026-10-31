@@ -19,7 +19,7 @@ A backend-focused finance management application built with Django and Django RE
 
 ### Budgets & Reports
 - Budget creation and tracking
-- Budget alert notifications
+- Currency-aware budget limits and spending, with alerts at 80% and 100%
 - Monthly dashboard analytics with charts
 - Preferred currency summaries
 - Multi-currency reporting
@@ -32,6 +32,8 @@ Read-only REST API endpoints:
 
 ### Utilities
 - Demo data seeding command
+- CSV and PDF statement imports with duplicate detection and malformed-row counts
+- Bulk CSV transaction upload
 - PostgreSQL-first configuration
 - Optional SQLite fallback for local development
 
@@ -79,6 +81,7 @@ pip install -r requirements.txt
 ## 4. Configure Environment Variables
 
 Copy values from `.env.example` and configure the required variables.
+The app reads environment variables directly; it does not load `.env` automatically. To use a local `.env` file in a shell, run `set -a; source .env; set +a` before Django commands.
 
 ### Required Variables
 
@@ -215,5 +218,31 @@ password: demo12345
 ```bash
 python manage.py test
 ```
+
+GitHub Actions runs the Django checks, migration check, and test suite against PostgreSQL on each push and pull request.
+
+---
+
+# Statement Import Format
+
+CSV statements accept `date,amount,description,currency,transaction_type` headers. Dates use `YYYY-MM-DD`. The `transaction_type` column is optional; when omitted, positive amounts are interpreted as expenses and negative amounts as income. Include it when your bank uses a different sign convention.
+
+```csv
+date,amount,description,currency,transaction_type
+2026-04-10,1200.00,Salary,INR,income
+2026-04-11,250.00,Groceries,INR,expense
+```
+
+The PDF importer supports text-based statements whose transaction lines contain comma-separated date, amount, description, and currency fields. Scanned and bank-specific PDF layouts are not supported yet. Uploaded statement and bulk CSV files are limited to 5 MB.
+
+---
+
+# Deployment
+
+The [live demo](https://expense-tracker-250p.onrender.com/) runs on Render. Configure a PostgreSQL database and set `DATABASE_URL`, `DJANGO_SECRET_KEY`, `DEBUG=0`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, and `APP_BASE_URL` on the web service. The build command should install requirements and run `./build.sh`; the start command is `gunicorn config.wsgi:application --bind 0.0.0.0:$PORT`.
+
+`/health/` checks database connectivity. The scheduled GitHub Action calls this endpoint and reports failures.
+
+Render's free PostgreSQL databases expire after 30 days. A durable deployment needs a database plan that does not expire; the free database should not be used for important user data.
 
 ---

@@ -2,6 +2,7 @@ from calendar import month_name
 from decimal import Decimal
 
 from django.contrib.auth.decorators import login_required
+from django.db import DatabaseError, connection
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -18,13 +19,18 @@ from transactions.services import (
 
 
 def health_view(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+    except DatabaseError:
+        return JsonResponse({"status": "unavailable"}, status=503)
     return JsonResponse({"status": "ok"})
 
 
 @login_required
 def dashboard_view(request):
     transactions = Transaction.objects.for_user(request.user).select_related("category", "currency")
-    budgets = Budget.objects.filter(user=request.user).select_related("category")
+    budgets = Budget.objects.filter(user=request.user).select_related("category", "currency")
     today = timezone.localdate()
     period_filters = resolve_period_filters(request.GET, today=today)
     filtered_transactions = apply_transaction_period(transactions, period_filters)
