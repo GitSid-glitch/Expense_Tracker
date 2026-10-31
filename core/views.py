@@ -1,14 +1,17 @@
 from calendar import month_name
 from decimal import Decimal
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import DatabaseError, connection
+from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 
 from budgets.models import Budget
 from core.date_ranges import PERIOD_CHOICES, apply_budget_period, apply_transaction_period, resolve_period_filters
+from core.sample_data import load_sample_workspace, sample_workspace_available
 from transactions.models import Transaction
 from transactions.services import (
     convert_amount,
@@ -103,5 +106,24 @@ def dashboard_view(request):
             "period_choices": PERIOD_CHOICES,
             "available_years": available_years,
             "month_choices": [(index, month_name[index]) for index in range(1, 13)],
+            "show_sample_data_cta": sample_workspace_available(request.user),
         },
     )
+
+
+@login_required
+@require_POST
+def load_sample_data_view(request):
+    if load_sample_workspace(request.user):
+        messages.success(
+            request,
+            "Your sample workspace is ready. Explore the dashboard, budgets, reports, imports and insights.",
+        )
+    elif request.user.profile.sample_data_loaded:
+        messages.info(request, "Sample data is already loaded in this workspace.")
+    else:
+        messages.warning(
+            request,
+            "Sample data can only be added to an empty workspace so it does not mix with your records.",
+        )
+    return redirect("dashboard")

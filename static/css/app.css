@@ -199,3 +199,17 @@ button, input, select, textarea { font: inherit; }
 .delete-icon { align-items: center; background: #fbefec; border-radius: 12px; color: #bf6556; display: inline-flex; font: 700 19px 'Manrope', sans-serif; height: 43px; justify-content: center; width: 43px; }
 .btn-danger { background: #b9574b; border-color: #b9574b; }.btn-danger:hover { background: #9e463c; border-color: #9e463c; }
 @media (max-width: 600px) { .side-nav { gap: 0; }.side-link { width: 42px; }.notification-item { gap: 10px; padding: 12px !important; } }
+.sample-data-banner { align-items: center; background: linear-gradient(115deg, #14392f 0%, #1b5142 62%, #28644f 100%); border: 1px solid rgba(255,255,255,.13); border-radius: 13px; box-shadow: 0 13px 34px rgba(18,62,48,.16); color: #fff; display: flex; gap: 18px; overflow: hidden; padding: 22px 24px; position: relative; }
+.sample-data-banner:after { border: 1px solid rgba(255,255,255,.08); border-radius: 50%; content: ''; height: 280px; position: absolute; right: 13%; top: -160px; width: 280px; }
+.sample-data-mark { align-items: center; background: rgba(219,242,225,.14); border: 1px solid rgba(219,242,225,.18); border-radius: 12px; color: #bde2c7; display: inline-flex; flex: 0 0 44px; font-size: 22px; height: 44px; justify-content: center; position: relative; z-index: 1; }
+.sample-data-copy { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.sample-data-eyebrow { color: #a9d3b7; font-size: 9px; font-weight: 700; letter-spacing: 1.1px; }
+.sample-data-copy h2 { color: #fff; font: 700 16px 'Manrope', sans-serif; letter-spacing: -.25px; margin: 5px 0; }
+.sample-data-copy p { color: #c4d8ce; font-size: 11px; line-height: 1.55; margin: 0 0 10px; max-width: 670px; }
+.sample-data-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.sample-data-tags span { background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.09); border-radius: 99px; color: #d7e8de; font-size: 9px; padding: 4px 8px; white-space: nowrap; }
+.sample-data-action { align-items: center; display: flex; flex: 0 0 auto; flex-direction: column; gap: 7px; position: relative; z-index: 1; }
+.sample-data-action .btn { color: #164c3b; font-size: 11px; white-space: nowrap; }.sample-data-action .btn:hover { background: #e6f2e9; color: #103d30; }
+.sample-data-action small { color: #b5d0c1; font-size: 9px; }
+@media (max-width: 900px) { .sample-data-banner { align-items: flex-start; flex-wrap: wrap; }.sample-data-action { align-items: flex-start; flex-basis: 100%; flex-direction: row; } }
+@media (max-width: 600px) { .sample-data-banner { gap: 11px; padding: 16px; }.sample-data-mark { flex-basis: 36px; height: 36px; width: 36px; }.sample-data-copy h2 { font-size: 14px; }.sample-data-copy p { font-size: 10px; }.sample-data-action { align-items: stretch; flex-direction: column; }.sample-data-action .btn { width: 100%; } }

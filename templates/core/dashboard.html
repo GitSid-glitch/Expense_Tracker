@@ -11,6 +11,23 @@
     <a href="{% url 'transaction-add' %}" class="btn btn-primary">＋ &nbsp;Add transaction</a>
 </section>
 
+{% if show_sample_data_cta %}
+<section class="sample-data-banner mb-4">
+    <div class="sample-data-mark">✳</div>
+    <div class="sample-data-copy">
+        <span class="sample-data-eyebrow">NEW TO MONETA?</span>
+        <h2>Explore with a ready-made sample workspace</h2>
+        <p>Load realistic sample activity to try the dashboard, reports, budgets, alerts, refunds, multi-currency totals, anomaly insights and both CSV import histories.</p>
+        <div class="sample-data-tags"><span>6 months of activity</span><span>3 transaction types</span><span>5 currencies</span><span>Easy to edit or delete</span></div>
+    </div>
+    <form method="post" action="{% url 'load-sample-data' %}" class="sample-data-action">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-light">Explore with sample data <span aria-hidden="true">→</span></button>
+        <small>Added only to this empty workspace</small>
+    </form>
+</section>
+{% endif %}
+
 <section class="card mb-4">
     <div class="card-body py-3">
         <form method="get" class="row g-2 align-items-end">

@@ -45,7 +45,7 @@
                 {% if form.instance.receipt %}
                     <div class="mt-2">
                         Current receipt:
-                        <a href="{{ form.instance.receipt.url }}" target="_blank">View uploaded file</a>
+                            <a href="{% url 'receipt-view' form.instance.pk %}" target="_blank" rel="noopener">View uploaded file</a>
                     </div>
                 {% endif %}
                 {% if form.receipt.errors %}<div class="text-danger small">{{ form.receipt.errors }}</div>{% endif %}

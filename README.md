@@ -211,6 +211,9 @@ username: demo
 password: demo12345
 ```
 
+The demo workspace is deterministic and includes six months of income, expenses and investments across five currencies; refunds; a deliberately unusual purchase for the anomaly view; monthly budgets with 80% and 100% alerts; sample notifications; and CSV, PDF and bulk-upload history with duplicate and invalid rows. The dashboard also offers **Explore with sample data** for an empty account. It adds the walkthrough to that signed-in account, so the dashboard, reports, filters, budgets, imports and authenticated APIs all have data to explore. It will not mix sample records into an account that already has financial records.
+
+Receipt links are served through an authenticated view that checks ownership before returning the uploaded file.
 ---
 
 # Running Tests

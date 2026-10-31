@@ -100,7 +100,7 @@
                     <td>{{ transaction.currency.code }}</td>
                     <td>
                         {% if transaction.receipt %}
-                            <a href="{{ transaction.receipt.url }}" target="_blank">View</a>
+                            <a href="{% url 'receipt-view' transaction.pk %}" target="_blank" rel="noopener">View receipt</a>
                         {% else %}
                             -
                         {% endif %}

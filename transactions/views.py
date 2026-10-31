@@ -1,11 +1,13 @@
 import csv
+import mimetypes
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from budgets.models import Budget
 from budgets.services import send_budget_alerts_for_budget
@@ -81,7 +83,9 @@ def transaction_list_view(request):
                     transaction.description,
                     transaction.amount,
                     transaction.currency.code,
-                    transaction.receipt.url if transaction.receipt else "",
+                    request.build_absolute_uri(reverse("receipt-view", kwargs={"pk": transaction.pk}))
+                    if transaction.receipt
+                    else "",
                 ]
             )
         return response
@@ -103,6 +107,19 @@ def transaction_list_view(request):
             "date_to": date_to or "",
         },
     )
+
+
+@login_required
+def receipt_view(request, pk):
+    transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
+    if not transaction.receipt:
+        return HttpResponse(status=404)
+    content_type = mimetypes.guess_type(transaction.receipt.name)[0] or "application/octet-stream"
+    try:
+        receipt_file = transaction.receipt.open("rb")
+    except OSError:
+        return HttpResponse(status=404)
+    return FileResponse(receipt_file, content_type=content_type)
 
 
 @login_required
