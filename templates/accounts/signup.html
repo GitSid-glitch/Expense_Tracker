@@ -1,22 +1,26 @@
 {% extends "base.html" %}
 {% load socialaccount %}
-{% block content %}
+{% block title %}Create account — Moneta{% endblock %}
+{% block auth_content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card shadow-sm">
+        <div class="card">
             <div class="card-body">
-                <h2 class="h4 mb-3">Create account</h2>
+                <div class="eyebrow">A FRESH START</div>
+                <h1 class="mb-2">Make money feel simpler.</h1>
+                <p class="text-muted mb-4">Create your account to bring your finances together.</p>
                 <form method="post">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <button class="btn btn-primary" type="submit">Sign up</button>
+                    <button class="btn btn-primary" type="submit">Create account</button>
                 </form>
                 <hr>
                 {% if google_auth_enabled %}
                     <a href="{% provider_login_url 'google' process='login' %}" class="btn btn-outline-dark">Sign up with Google</a>
                 {% else %}
-                    <p class="text-muted mb-0">Google sign-up will work after you add the Google OAuth client ID and secret.</p>
+                    <p class="text-muted mb-0">Google sign-up is currently unavailable.</p>
                 {% endif %}
+                <p class="text-center mt-4 mb-0 text-muted">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
             </div>
         </div>
     </div>

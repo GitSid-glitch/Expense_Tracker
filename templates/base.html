@@ -1,50 +1,69 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Finance Tracker</title>
+    <meta name="theme-color" content="#f5f7f7">
+    <title>{% block title %}Moneta — Personal finance{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'dashboard' %}">Finance Tracker</a>
-            <div class="navbar-nav ms-auto">
-                {% if user.is_authenticated %}
-                    <a class="nav-link" href="{% url 'transaction-list' %}">Transactions</a>
-                    <a class="nav-link" href="{% url 'statement-import' %}">Imports</a>
-                    <a class="nav-link" href="{% url 'transaction-anomalies' %}">Anomalies</a>
-                    <a class="nav-link" href="{% url 'category-list' %}">Categories</a>
-                    <a class="nav-link" href="{% url 'budget-list' %}">Budgets</a>
-                    <a class="nav-link position-relative" href="{% url 'notification-list' %}">
-                        Notifications
-                        {% if unread_notification_count %}
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ unread_notification_count }}
-                            </span>
-                        {% endif %}
-                    </a>
-                    <a class="nav-link" href="{% url 'monthly-report' %}">Reports</a>
-                    <a class="nav-link" href="{% url 'profile' %}">Profile</a>
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-light ms-3">Logout</button>
-                    </form>
-                {% else %}
-                    <a class="nav-link" href="{% url 'login' %}">Login</a>
-                    <a class="nav-link" href="{% url 'signup' %}">Sign up</a>
-                {% endif %}
+<body>
+    {% if user.is_authenticated %}
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="{% url 'dashboard' %}" aria-label="Moneta home">
+                <span class="brand-mark">m</span><span>moneta<span class="brand-period">.</span></span>
+            </a>
+            <div class="sidebar-label">Workspace</div>
+            <nav class="side-nav" aria-label="Main navigation">
+                <a class="side-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><span class="nav-icon">◫</span><span>Overview</span></a>
+                <a class="side-link {% if 'transaction' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'transaction-list' %}"><span class="nav-icon">↔</span><span>Transactions</span></a>
+                <a class="side-link {% if 'budget' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'budget-list' %}"><span class="nav-icon">◎</span><span>Budgets</span></a>
+                <a class="side-link {% if 'monthly-report' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'monthly-report' %}"><span class="nav-icon">▥</span><span>Reports</span></a>
+            </nav>
+            <div class="sidebar-label sidebar-label-spaced">Manage</div>
+            <nav class="side-nav" aria-label="Finance tools">
+                <a class="side-link {% if request.resolver_match.url_name == 'statement-import' or request.resolver_match.url_name == 'transaction-bulk-upload' %}active{% endif %}" href="{% url 'statement-import' %}"><span class="nav-icon">⇧</span><span>Import data</span></a>
+                <a class="side-link {% if request.resolver_match.url_name == 'transaction-anomalies' %}active{% endif %}" href="{% url 'transaction-anomalies' %}"><span class="nav-icon">⌁</span><span>Spending insights</span></a>
+                <a class="side-link {% if request.resolver_match.url_name == 'category-list' %}active{% endif %}" href="{% url 'category-list' %}"><span class="nav-icon">▦</span><span>Categories</span></a>
+                <a class="side-link {% if request.resolver_match.url_name == 'notification-list' %}active{% endif %}" href="{% url 'notification-list' %}"><span class="nav-icon">♧</span><span>Notifications</span>{% if unread_notification_count %}<span class="nav-count badge rounded-pill bg-danger">{{ unread_notification_count }}</span>{% endif %}</a>
+            </nav>
+            <div class="sidebar-bottom">
+                <a class="profile-chip" href="{% url 'profile' %}">
+                    <span class="avatar">{{ request.user.username|first|upper }}</span>
+                    <span class="profile-meta"><strong>{{ request.user.get_full_name|default:request.user.username }}</strong><small>Personal account</small></span>
+                    <span class="profile-more">···</span>
+                </a>
+                <form method="post" action="{% url 'logout' %}" class="logout-form">{% csrf_token %}<button class="logout-button" type="submit">↗ &nbsp;Sign out</button></form>
             </div>
-        </div>
-    </nav>
-    <main class="container pb-5">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags|default:'info' }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-        {% block content %}{% endblock %}
-    </main>
+        </aside>
+        <main class="main-panel">
+            <header class="topbar">
+                <div class="topbar-caption">PERSONAL FINANCE <span>/</span> {% block eyebrow %}WORKSPACE{% endblock %}</div>
+                <div class="topbar-actions">
+                    <a class="topbar-icon" href="{% url 'notification-list' %}" aria-label="Notifications">♧{% if unread_notification_count %}<i></i>{% endif %}</a>
+                    <span class="topbar-date">{% now "D, M j" %}</span>
+                </div>
+            </header>
+            <div class="page-content">
+                {% if messages %}
+                    {% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} app-alert">{{ message }}</div>{% endfor %}
+                {% endif %}
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    {% else %}
+        <main class="auth-shell">
+            <a class="brand auth-brand" href="{% url 'login' %}"><span class="brand-mark">m</span><span>moneta<span class="brand-period">.</span></span></a>
+            {% if messages %}{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} auth-alert">{{ message }}</div>{% endfor %}{% endif %}
+            {% block auth_content %}{% endblock %}
+            <p class="auth-footer">A clearer picture of your money.</p>
+        </main>
+    {% endif %}
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

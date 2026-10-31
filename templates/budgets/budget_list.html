@@ -1,10 +1,9 @@
 {% extends "base.html" %}
+{% block title %}Budgets — Moneta{% endblock %}
+{% block eyebrow %}BUDGETS{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Budgets</h1>
-    <a href="{% url 'budget-add' %}" class="btn btn-primary">Add budget</a>
-</div>
-<div class="table-responsive">
+<section class="page-heading"><div><div class="eyebrow">PLAN WITH CONFIDENCE</div><h1>Your budgets</h1><p>Set thoughtful limits and keep an eye on your progress.</p></div><a href="{% url 'budget-add' %}" class="btn btn-primary">＋ &nbsp;Create budget</a></section>
+<section class="card"><div class="card-body p-0"><div class="px-3 pt-3 pb-2"><h2 class="card-title">Budget overview</h2><p class="card-subtitle">Progress and limits across your categories.</p></div><div class="table-responsive px-2 pb-2">
     <table class="table table-striped">
         <thead>
             <tr>
@@ -30,9 +29,10 @@
                     </td>
                 </tr>
             {% empty %}
-                <tr><td colspan="6" class="text-muted">No budgets configured yet.</td></tr>
+                <tr><td colspan="6" class="empty-state">No budgets configured yet. Create one to start planning your spending.</td></tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+</div></section>
 {% endblock %}

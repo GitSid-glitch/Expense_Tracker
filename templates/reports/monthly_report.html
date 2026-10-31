@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+{% block title %}Reports — Moneta{% endblock %}
+{% block eyebrow %}REPORTS{% endblock %}
 {% block content %}
-<h1 class="h3 mb-1">Financial Report</h1>
-<p class="text-muted mb-4">Viewing report data for {{ period_label }}.</p>
-<form method="get" class="row g-3 mb-4">
+<section class="page-heading"><div><div class="eyebrow">MAKE SENSE OF THE NUMBERS</div><h1>Financial reports</h1><p>Explore your income, spending and investments over time.</p></div></section>
+<section class="card mb-4"><div class="card-body"><div class="mb-3"><h2 class="card-title">Report filters</h2><p class="card-subtitle">Viewing {{ period_label }}.</p></div><form method="get" class="row g-3">
     <div class="col-md-2">
         <label class="form-label">View</label>
         <select name="period" class="form-select">
@@ -57,7 +58,7 @@
         <button class="btn btn-primary" type="submit">Filter</button>
         <button class="btn btn-outline-secondary ms-2" type="submit" name="export" value="csv">Export CSV</button>
     </div>
-</form>
+</form></div></section>
 <div class="row g-3 mb-4">
     <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Total income ({{ preferred_currency.code }})</div><div class="h4">{{ totals.income }}</div></div></div></div>
     <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Total expenses ({{ preferred_currency.code }})</div><div class="h4">{{ totals.expense }}</div></div></div></div>
@@ -83,7 +84,7 @@
                             <td>{{ row.total }}</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="3" class="text-muted">No reporting data yet.</td></tr>
+                        <tr><td colspan="3" class="empty-state">No reporting data for the selected filters.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -108,7 +109,7 @@
                             <td>{{ row.total }}</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="2" class="text-muted">No expense data for the selected filters.</td></tr>
+                        <tr><td colspan="2" class="empty-state">No expense data for the selected filters.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
