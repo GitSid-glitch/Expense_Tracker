@@ -1,15 +1,18 @@
 {% extends "base.html" %}
+{% block title %}Spending insights — Moneta{% endblock %}
+{% block eyebrow %}INSIGHTS{% endblock %}
 {% block content %}
-<div class="card shadow-sm">
+<section class="page-heading"><div><div class="eyebrow">A CLOSER LOOK AT SPENDING</div><h1>Spending insights</h1><p>Review expenses that stand out from your usual patterns.</p></div></section>
+<div class="card">
     <div class="card-body">
-        <h1 class="h4 mb-3">Spending Anomalies</h1>
-        <p class="text-muted mb-2">An anomaly is any non-refund expense that sits well above the usual range in INR.</p>
-        <p class="text-muted">
+        <div class="d-flex align-items-start gap-3 mb-3"><span class="form-hero-icon">⌁</span><div><h2 class="card-title">Unusual expenses</h2><p class="card-subtitle">Potential outliers, with context to help you review them.</p></div></div>
+        <p class="text-muted mb-2">An anomaly is a non-refund expense that sits well above the usual range after conversion to INR.</p>
+        <p class="text-muted small">
             If a category has enough history, the app compares the expense against that category's past behavior.
             Otherwise it falls back to your overall expense history so newer categories can still be reviewed sensibly.
         </p>
-        <div class="alert alert-light border small">
-            <strong>How to read this table:</strong> "Comparison basis" tells you whether the expense was judged against
+        <div class="insight-note mb-3">
+            <strong>How to read this:</strong> “Comparison basis” tells you whether the expense was judged against
             category history or overall expense history. "Median" is the typical amount in that comparison group, and
             "Threshold" is the minimum level above which the expense is flagged.
         </div>
@@ -43,7 +46,7 @@
                             <td>{{ item.threshold_in_inr }}</td>
                         </tr>
                     {% empty %}
-                        <tr><td colspan="8" class="text-muted">No anomalies detected from current expenses.</td></tr>
+                        <tr><td colspan="8" class="empty-state">No unusual expenses detected. Your current spending is within the expected range.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

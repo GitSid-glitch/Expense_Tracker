@@ -19,17 +19,17 @@
             </a>
             <div class="sidebar-label">Workspace</div>
             <nav class="side-nav" aria-label="Main navigation">
-                <a class="side-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><span class="nav-icon">◫</span><span>Overview</span></a>
-                <a class="side-link {% if 'transaction' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'transaction-list' %}"><span class="nav-icon">↔</span><span>Transactions</span></a>
-                <a class="side-link {% if 'budget' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'budget-list' %}"><span class="nav-icon">◎</span><span>Budgets</span></a>
-                <a class="side-link {% if 'monthly-report' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'monthly-report' %}"><span class="nav-icon">▥</span><span>Reports</span></a>
+                <a class="side-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}" aria-label="Overview"><span class="nav-icon">◫</span><span>Overview</span></a>
+                <a class="side-link {% if 'transaction' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'transaction-list' %}" aria-label="Transactions"><span class="nav-icon">↔</span><span>Transactions</span></a>
+                <a class="side-link {% if 'budget' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'budget-list' %}" aria-label="Budgets"><span class="nav-icon">◎</span><span>Budgets</span></a>
+                <a class="side-link {% if 'monthly-report' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'monthly-report' %}" aria-label="Reports"><span class="nav-icon">▥</span><span>Reports</span></a>
             </nav>
             <div class="sidebar-label sidebar-label-spaced">Manage</div>
             <nav class="side-nav" aria-label="Finance tools">
-                <a class="side-link {% if request.resolver_match.url_name == 'statement-import' or request.resolver_match.url_name == 'transaction-bulk-upload' %}active{% endif %}" href="{% url 'statement-import' %}"><span class="nav-icon">⇧</span><span>Import data</span></a>
-                <a class="side-link {% if request.resolver_match.url_name == 'transaction-anomalies' %}active{% endif %}" href="{% url 'transaction-anomalies' %}"><span class="nav-icon">⌁</span><span>Spending insights</span></a>
-                <a class="side-link {% if request.resolver_match.url_name == 'category-list' %}active{% endif %}" href="{% url 'category-list' %}"><span class="nav-icon">▦</span><span>Categories</span></a>
-                <a class="side-link {% if request.resolver_match.url_name == 'notification-list' %}active{% endif %}" href="{% url 'notification-list' %}"><span class="nav-icon">♧</span><span>Notifications</span>{% if unread_notification_count %}<span class="nav-count badge rounded-pill bg-danger">{{ unread_notification_count }}</span>{% endif %}</a>
+                <a class="side-link {% if request.resolver_match.url_name == 'statement-import' or request.resolver_match.url_name == 'transaction-bulk-upload' %}active{% endif %}" href="{% url 'statement-import' %}" aria-label="Import data"><span class="nav-icon">⇧</span><span>Import data</span></a>
+                <a class="side-link {% if request.resolver_match.url_name == 'transaction-anomalies' %}active{% endif %}" href="{% url 'transaction-anomalies' %}" aria-label="Spending insights"><span class="nav-icon">⌁</span><span>Spending insights</span></a>
+                <a class="side-link {% if request.resolver_match.url_name == 'category-list' %}active{% endif %}" href="{% url 'category-list' %}" aria-label="Categories"><span class="nav-icon">▦</span><span>Categories</span></a>
+                <a class="side-link {% if request.resolver_match.url_name == 'notification-list' %}active{% endif %}" href="{% url 'notification-list' %}" aria-label="Notifications"><span class="nav-icon">♧</span><span>Notifications</span>{% if unread_notification_count %}<span class="nav-count badge rounded-pill bg-danger">{{ unread_notification_count }}</span>{% endif %}</a>
             </nav>
             <div class="sidebar-bottom">
                 <a class="profile-chip" href="{% url 'profile' %}">

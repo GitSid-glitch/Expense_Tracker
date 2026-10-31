@@ -1,13 +1,18 @@
 {% extends "base.html" %}
+{% block title %}Delete transaction — Moneta{% endblock %}
+{% block eyebrow %}TRANSACTIONS / DELETE{% endblock %}
 {% block content %}
-<div class="card shadow-sm">
+<div class="row justify-content-center"><div class="col-lg-6"><div class="card">
     <div class="card-body">
-        <h1 class="h4">Delete transaction</h1>
-        <p>Are you sure you want to delete "{{ transaction.description }}"?</p>
-        <form method="post">
+        <span class="delete-icon">!</span><div class="eyebrow mt-3">REMOVE TRANSACTION</div>
+        <h1 class="card-title mb-2">Delete this transaction?</h1>
+        <p class="text-muted mb-1">{{ transaction.description|default:transaction.display_category }} · {{ transaction.amount }} {{ transaction.currency.code }}</p>
+        <p class="text-muted">This removes the transaction from reports and budgets.</p>
+        <form method="post" class="d-flex gap-2 mt-4">
             {% csrf_token %}
-            <button class="btn btn-danger" type="submit">Delete</button>
+            <button class="btn btn-danger" type="submit">Delete transaction</button>
+            <a href="{% url 'transaction-list' %}" class="btn btn-outline-secondary">Keep transaction</a>
         </form>
     </div>
-</div>
+</div></div></div>
 {% endblock %}

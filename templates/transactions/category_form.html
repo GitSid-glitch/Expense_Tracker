@@ -1,13 +1,17 @@
 {% extends "base.html" %}
+{% block title %}{{ title }} — Moneta{% endblock %}
+{% block eyebrow %}CATEGORIES / EDITOR{% endblock %}
 {% block content %}
-<div class="card shadow-sm">
+<section class="page-heading"><div><div class="eyebrow">MAKE YOUR ACTIVITY EASIER TO READ</div><h1>{{ title }}</h1><p>Create a category that matches the way you manage money.</p></div></section>
+<div class="row justify-content-center"><div class="col-lg-7"><div class="card">
     <div class="card-body">
-        <h1 class="h4 mb-3">{{ title }}</h1>
+        <h2 class="card-title mb-1">Category details</h2><p class="card-subtitle mb-4">Give it a clear name and transaction type.</p>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button class="btn btn-primary" type="submit">Save</button>
+            <button class="btn btn-primary" type="submit">Save category</button>
+            <a href="{% url 'category-list' %}" class="btn btn-outline-secondary ms-1">Cancel</a>
         </form>
     </div>
-</div>
+</div></div></div>
 {% endblock %}

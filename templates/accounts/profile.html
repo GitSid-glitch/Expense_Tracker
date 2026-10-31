@@ -1,14 +1,14 @@
 {% extends "base.html" %}
+{% block title %}Account settings — Moneta{% endblock %}
+{% block eyebrow %}ACCOUNT{% endblock %}
 {% block content %}
+<section class="page-heading"><div><div class="eyebrow">YOUR DETAILS, YOUR PREFERENCES</div><h1>Account settings</h1><p>Manage your profile and preferred currency.</p></div></section>
 <div class="row g-4">
     <div class="col-lg-8">
-        <div class="card shadow-sm">
+        <div class="card">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-4">
-                    <div>
-                        <h1 class="h4 mb-1">Account Settings</h1>
-                        <p class="text-muted mb-0">Manage your personal details and profile preferences.</p>
-                    </div>
+                    <div><h2 class="card-title mb-1">Personal information</h2><p class="card-subtitle">Update the details attached to your account.</p></div>
                 </div>
                 <form method="post">
                     {% csrf_token %}
@@ -55,9 +55,11 @@
         </div>
     </div>
     <div class="col-lg-4">
-        <div class="card shadow-sm">
+        <div class="card">
             <div class="card-body">
-                <h2 class="h6 text-uppercase text-muted mb-3">Account Summary</h2>
+                <span class="profile-summary-avatar">{{ request.user.username|first|upper }}</span>
+                <h2 class="card-title mt-3 mb-1">{{ request.user.get_full_name|default:request.user.username }}</h2>
+                <p class="card-subtitle mb-4">Account summary</p>
                 <dl class="row mb-0">
                     <dt class="col-sm-5">Username</dt>
                     <dd class="col-sm-7">{{ request.user.username }}</dd>

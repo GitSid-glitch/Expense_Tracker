@@ -1,19 +1,23 @@
 {% extends "base.html" %}
+{% block title %}Delete category — Moneta{% endblock %}
+{% block eyebrow %}CATEGORIES / DELETE{% endblock %}
 {% block content %}
-<div class="card shadow-sm">
+<div class="row justify-content-center"><div class="col-lg-6"><div class="card">
     <div class="card-body">
-        <h1 class="h4">Delete category</h1>
-        <p>Delete "{{ category.name }}"?</p>
+        <span class="delete-icon">!</span><div class="eyebrow mt-3">REMOVE CATEGORY</div>
+        <h1 class="card-title mb-2">Delete “{{ category.name }}”?</h1>
+        <p class="text-muted">This action cannot be undone.</p>
         {% if linked_count %}
             <p class="text-muted">This category has {{ linked_count }} linked transactions. They will be preserved using a category snapshot.</p>
         {% endif %}
         {% if linked_budget_count %}
             <p class="text-muted">This category is also used by {{ linked_budget_count }} budgets. Those budgets will be deleted with the category.</p>
         {% endif %}
-        <form method="post">
+        <form method="post" class="d-flex gap-2 mt-4">
             {% csrf_token %}
-            <button class="btn btn-danger" type="submit">Delete</button>
+            <button class="btn btn-danger" type="submit">Delete category</button>
+            <a href="{% url 'category-list' %}" class="btn btn-outline-secondary">Keep category</a>
         </form>
     </div>
-</div>
+</div></div></div>
 {% endblock %}

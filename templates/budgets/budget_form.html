@@ -1,13 +1,17 @@
 {% extends "base.html" %}
+{% block title %}{{ title }} — Moneta{% endblock %}
+{% block eyebrow %}BUDGETS / EDITOR{% endblock %}
 {% block content %}
-<div class="card shadow-sm">
+<section class="page-heading"><div><div class="eyebrow">PLAN YOUR SPENDING</div><h1>{{ title }}</h1><p>Set a monthly limit for one of your spending categories.</p></div></section>
+<div class="row justify-content-center"><div class="col-lg-7"><div class="card">
     <div class="card-body">
-        <h1 class="h4 mb-3">{{ title }}</h1>
+        <div class="d-flex align-items-center gap-3 mb-4"><span class="form-hero-icon">◎</span><div><h2 class="card-title">Budget details</h2><p class="card-subtitle">You can adjust these limits at any time.</p></div></div>
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button class="btn btn-primary" type="submit">Save</button>
+            <button class="btn btn-primary" type="submit">Save budget</button>
+            <a href="{% url 'budget-list' %}" class="btn btn-outline-secondary ms-1">Cancel</a>
         </form>
     </div>
-</div>
+</div></div></div>
 {% endblock %}

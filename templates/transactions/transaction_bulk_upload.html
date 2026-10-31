@@ -1,10 +1,14 @@
 {% extends "base.html" %}
+{% block title %}Bulk upload — Moneta{% endblock %}
+{% block eyebrow %}IMPORT DATA / CSV{% endblock %}
 {% block content %}
+<section class="page-heading"><div><div class="eyebrow">ADD MANY RECORDS AT ONCE</div><h1>Bulk transaction upload</h1><p>Import transactions from a CSV file and review the upload history.</p></div><a href="{% url 'statement-import' %}" class="btn btn-outline-secondary">Import a statement</a></section>
 <div class="row g-4">
     <div class="col-lg-5">
-        <div class="card shadow-sm">
+        <div class="card">
             <div class="card-body">
-                <h1 class="h4 mb-3">Bulk Upload Transactions</h1>
+                <span class="form-hero-icon mb-3">⇧</span><h2 class="card-title">Upload a CSV</h2><p class="card-subtitle mb-3">Use these columns to map each row to a transaction.</p>
+                <div class="import-help">
                 <p class="text-muted">
                     Upload a CSV to create many transactions in one go. Supported columns:
                     <code>date</code>, <code>amount</code>, <code>description</code>, <code>currency</code>,
@@ -14,18 +18,19 @@
                     If <code>transaction_type</code> is omitted, positive amounts become expenses and negative amounts become income.
                     Category names can repeat across rows and missing categories are created automatically.
                 </p>
+                </div>
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form.as_p }}
-                    <button class="btn btn-primary" type="submit">Upload CSV</button>
+                    <button class="btn btn-primary" type="submit">Upload transactions</button>
                 </form>
             </div>
         </div>
     </div>
     <div class="col-lg-7">
-        <div class="card shadow-sm">
+        <div class="card">
             <div class="card-body">
-                <h2 class="h5">Bulk Upload History</h2>
+                <h2 class="card-title">Upload history</h2><p class="card-subtitle mb-3">Previously processed transaction files.</p>
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
@@ -45,7 +50,7 @@
                                     <td>{{ item.created_at }}</td>
                                 </tr>
                             {% empty %}
-                                <tr><td colspan="4" class="text-muted">No bulk uploads yet.</td></tr>
+                                <tr><td colspan="4" class="empty-state">No bulk uploads yet.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>

@@ -1,23 +1,21 @@
 {% extends "base.html" %}
+{% block title %}Notifications — Moneta{% endblock %}
+{% block eyebrow %}NOTIFICATIONS{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Notifications</h1>
-    <span class="badge bg-primary">{{ unread_count }} unread</span>
-</div>
-<div class="card shadow-sm">
-    <div class="card-body">
+<section class="page-heading"><div><div class="eyebrow">STAY IN THE LOOP</div><h1>Notifications</h1><p>Budget activity and important updates for your account.</p></div><span class="unread-pill">{{ unread_count }} unread</span></section>
+<div class="card"><div class="card-body">
         <div class="list-group">
             {% for notification in notifications %}
-                <div class="list-group-item">
+                <div class="list-group-item notification-item {% if not notification.is_read %}notification-unread{% endif %}">
                     <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="fw-semibold">{{ notification.title }}</div>
-                            <div class="text-muted small mb-1">{{ notification.created_at }}</div>
-                            <div>{{ notification.message }}</div>
+                        <div class="notification-copy">
+                            <div class="notification-title"><span class="notification-dot"></span>{{ notification.title }}</div>
+                            <div class="text-muted small mb-2">{{ notification.created_at|date:"M j, Y · g:i A" }}</div>
+                            <div class="notification-message">{{ notification.message }}</div>
                         </div>
                         <div>
                             {% if notification.is_read %}
-                                <span class="badge bg-secondary">Read</span>
+                                <span class="status-pill status-inactive">Read</span>
                             {% else %}
                                 <form method="post" action="{% url 'notification-read' notification.pk %}">
                                     {% csrf_token %}
@@ -28,7 +26,7 @@
                     </div>
                 </div>
             {% empty %}
-                <div class="text-muted">No notifications yet.</div>
+                <div class="empty-state">You’re all caught up. New updates will appear here.</div>
             {% endfor %}
         </div>
     </div>

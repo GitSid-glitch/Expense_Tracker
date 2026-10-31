@@ -1,10 +1,9 @@
 {% extends "base.html" %}
+{% block title %}Categories — Moneta{% endblock %}
+{% block eyebrow %}CATEGORIES{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3 mb-0">Categories</h1>
-    <a href="{% url 'category-add' %}" class="btn btn-primary">Add category</a>
-</div>
-<div class="table-responsive">
+<section class="page-heading"><div><div class="eyebrow">ORGANIZE YOUR ACTIVITY</div><h1>Categories</h1><p>Group transactions so your spending is easier to understand.</p></div><a href="{% url 'category-add' %}" class="btn btn-primary">＋ &nbsp;Add category</a></section>
+<section class="card"><div class="card-body p-0"><div class="px-3 pt-3 pb-2"><h2 class="card-title">Your categories</h2><p class="card-subtitle">Income, expense and investment groups.</p></div><div class="table-responsive px-2 pb-2">
     <table class="table table-striped">
         <thead>
             <tr>
@@ -17,18 +16,19 @@
         <tbody>
             {% for category in categories %}
                 <tr>
-                    <td>{{ category.name }}</td>
-                    <td>{{ category.get_transaction_type_display }}</td>
-                    <td>{% if category.is_active %}Active{% else %}Inactive{% endif %}</td>
+                    <td><strong>{{ category.name }}</strong></td>
+                    <td><span class="type-pill type-{{ category.transaction_type }}">{{ category.get_transaction_type_display }}</span></td>
+                    <td>{% if category.is_active %}<span class="status-pill status-active">Active</span>{% else %}<span class="status-pill status-inactive">Inactive</span>{% endif %}</td>
                     <td class="text-end">
                         <a href="{% url 'category-edit' category.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
                         <a href="{% url 'category-delete' category.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
                     </td>
                 </tr>
             {% empty %}
-                <tr><td colspan="4" class="text-muted">No categories created yet.</td></tr>
+                <tr><td colspan="4" class="empty-state">No categories created yet. Add one to organize your transactions.</td></tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+</div></section>
 {% endblock %}

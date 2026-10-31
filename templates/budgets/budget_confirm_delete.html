@@ -1,13 +1,17 @@
 {% extends "base.html" %}
+{% block title %}Delete budget — Moneta{% endblock %}
+{% block eyebrow %}BUDGETS / DELETE{% endblock %}
 {% block content %}
-<div class="card shadow-sm">
+<div class="row justify-content-center"><div class="col-lg-6"><div class="card">
     <div class="card-body">
-        <h1 class="h4">Delete budget</h1>
-        <p>Are you sure you want to delete the budget for "{{ budget.category.name }}"?</p>
-        <form method="post">
+        <span class="delete-icon">!</span><div class="eyebrow mt-3">REMOVE BUDGET</div>
+        <h1 class="card-title mb-2">Delete the {{ budget.category.name }} budget?</h1>
+        <p class="text-muted">This removes its limit and progress tracking.</p>
+        <form method="post" class="d-flex gap-2 mt-4">
             {% csrf_token %}
-            <button class="btn btn-danger" type="submit">Delete</button>
+            <button class="btn btn-danger" type="submit">Delete budget</button>
+            <a href="{% url 'budget-list' %}" class="btn btn-outline-secondary">Keep budget</a>
         </form>
     </div>
-</div>
+</div></div></div>
 {% endblock %}
